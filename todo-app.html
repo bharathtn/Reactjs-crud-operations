@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.7/react.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.7/react-dom.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.25/browser.min.js"></script>
+    <script src="https://cdn.firebase.com/js/client/1.0.17/firebase.js"></script>
 
     <style>
         a.delete{
@@ -35,22 +36,26 @@
                     text :'',
                     isEdit : 0,
                     todos : [
-                        {
-                             id : 1,
-                            text : 'meeting at work '
-                        },
-                        {
-                             id : 2,
-                            text : 'meeting at Home '
-                        },
-                        {
-                             id : 3,
-                            text : 'Food Shopping'
-                        }
+
                     ]
                 }
             },
 
+            componentWillMount :function(){
+                this.firebaseRef = new Firebase('https://todolist-aca63.firebaseio.com/todos');
+                var self =this;
+                this.firebaseRef.once("value",function(snapshot){
+                    var todos = [];
+                    snapshot.forEach(function(data){
+                        var todo ={
+                            id : data.val().id,
+                            text : data.val().text
+                        }
+                        todos.push(todo);
+                        self.setState({todos : todos});
+                    });
+                });
+            },
             render : function (){
                 return(
                     <div>
@@ -75,6 +80,7 @@
                         todos.splice(i,1);
                     }
                 }
+                this.firebaseRef.set(todos);
                 this.setState({
                     todos:todos
                 });
@@ -87,6 +93,7 @@
                     }
                 }
                 todos.push(todo);
+                this.firebaseRef.set(todos);
                 this.setState({
                     todos:todos
                 });
@@ -109,6 +116,7 @@
                 text :text
             }
 
+            this.firebaseRef.push(newTodo);
             this.setState({
                 todos :this.state.todos.concat(newTodo)
             });
